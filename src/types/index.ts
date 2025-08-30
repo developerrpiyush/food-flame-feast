@@ -3,6 +3,8 @@ export interface User {
   email: string;
   name: string;
   password: string;
+  securityQuestion: string;
+  securityAnswer: string;
   addresses: Address[];
   orders: Order[];
 }
@@ -43,9 +45,9 @@ export interface Order {
 export interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<boolean>;
-  signup: (email: string, password: string, name: string) => Promise<boolean>;
+  signup: (email: string, password: string, name: string, securityQuestion: string, securityAnswer: string) => Promise<boolean>;
   logout: () => void;
-  resetPassword: (email: string) => boolean;
+  resetPassword: (email: string, securityAnswer: string) => { success: boolean; password?: string };
   updateProfile: (updates: Partial<User>) => void;
 }
 

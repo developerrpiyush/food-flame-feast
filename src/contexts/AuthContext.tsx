@@ -57,7 +57,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const signup = async (email: string, password: string, name: string): Promise<boolean> => {
+  const signup = async (email: string, password: string, name: string, securityQuestion: string, securityAnswer: string): Promise<boolean> => {
     try {
       const users = JSON.parse(localStorage.getItem('users') || '[]');
       
@@ -75,6 +75,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         email,
         password,
         name,
+        securityQuestion,
+        securityAnswer: securityAnswer.toLowerCase().trim(),
         addresses: [],
         orders: []
       };
@@ -108,29 +110,30 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     });
   };
 
-  const resetPassword = (email: string): boolean => {
+  const resetPassword = (email: string, securityAnswer: string): { success: boolean; password?: string } => {
     try {
       const users = JSON.parse(localStorage.getItem('users') || '[]');
       const userIndex = users.findIndex((u: User) => u.email === email);
       
       if (userIndex !== -1) {
-        // Generate a simple new password (in real app, this would be sent via email)
-        const newPassword = `temp${Math.random().toString(36).slice(-6)}`;
-        users[userIndex].password = newPassword;
-        localStorage.setItem('users', JSON.stringify(users));
-        
-        toast({
-          title: "Password reset",
-          description: `Your new password is: ${newPassword}`,
-        });
-        return true;
+        const user = users[userIndex];
+        if (user.securityAnswer === securityAnswer.toLowerCase().trim()) {
+          return { success: true, password: user.password };
+        } else {
+          toast({
+            title: "Incorrect answer",
+            description: "Security question answer is incorrect",
+            variant: "destructive",
+          });
+          return { success: false };
+        }
       } else {
         toast({
           title: "Email not found",
           description: "No account found with this email address",
           variant: "destructive",
         });
-        return false;
+        return { success: false };
       }
     } catch (error) {
       toast({
@@ -138,7 +141,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         description: "Something went wrong during password reset",
         variant: "destructive",
       });
-      return false;
+      return { success: false };
     }
   };
 

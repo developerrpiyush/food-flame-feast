@@ -18,7 +18,7 @@ export const Menu: React.FC = () => {
 
   const categories = ['All', 'Pizza', 'Burgers', 'Chinese', 'Desserts', 'Beverages'];
 
-  // Fetch food data from TheMealDB API
+  // Fetch food data from multiple APIs
   const fetchFoodItems = useCallback(async (pageNum: number = 1, isLoadMore: boolean = false) => {
     if (isLoadMore) {
       setLoadingMore(true);
@@ -27,38 +27,136 @@ export const Menu: React.FC = () => {
     }
 
     try {
-      // Fetch from TheMealDB API - get random meals and category meals
-      const categories = ['Beef', 'Chicken', 'Dessert', 'Pasta', 'Seafood', 'Vegetarian'];
-      const promises = categories.map(async (category) => {
+      let allTransformedItems: FoodItem[] = [];
+
+      // Fetch from TheMealDB API
+      const mealCategories = ['Beef', 'Chicken', 'Dessert', 'Pasta', 'Seafood', 'Vegetarian'];
+      const mealPromises = mealCategories.map(async (category) => {
         const response = await fetch(`https://www.themealdb.com/api/json/v1/1/filter.php?c=${category}`);
         const data = await response.json();
-        return data.meals?.slice(0, 3) || []; // Get 3 items per category
+        return data.meals?.slice(0, 4) || []; // Get 4 items per category
       });
 
-      const categoryResults = await Promise.all(promises);
-      const allMeals = categoryResults.flat();
+      const mealResults = await Promise.all(mealPromises);
+      const allMeals = mealResults.flat();
 
-      // Transform API data to our FoodItem format
-      const transformedItems: FoodItem[] = allMeals.map((meal: any, index: number) => ({
-        id: meal.idMeal,
+      // Transform TheMealDB data
+      const mealItems: FoodItem[] = allMeals.map((meal: any) => ({
+        id: `meal-${meal.idMeal}`,
         name: meal.strMeal,
-        description: `Delicious ${meal.strMeal} prepared with fresh ingredients`,
-        price: Math.floor(Math.random() * 20) + 8, // Random price between 8-28
+        description: `Delicious ${meal.strMeal} prepared with fresh ingredients and authentic spices`,
+        price: Math.floor(Math.random() * 20) + 8,
         image: meal.strMealThumb,
         category: getCategoryFromMeal(meal.strMeal),
-        rating: Math.round((Math.random() * 1.5 + 3.5) * 10) / 10, // Random rating 3.5-5.0
+        rating: Math.round((Math.random() * 1.5 + 3.5) * 10) / 10,
         prepTime: `${Math.floor(Math.random() * 20) + 15}-${Math.floor(Math.random() * 20) + 35} min`
       }));
 
+      allTransformedItems = [...allTransformedItems, ...mealItems];
+
+      // Fetch from CocktailDB API for beverages
+      try {
+        const drinkResponse = await fetch('https://www.thecocktaildb.com/api/json/v1/1/filter.php?c=Ordinary_Drink');
+        const drinkData = await drinkResponse.json();
+        const drinks = drinkData.drinks?.slice(0, 8) || [];
+
+        const drinkItems: FoodItem[] = drinks.map((drink: any) => ({
+          id: `drink-${drink.idDrink}`,
+          name: drink.strDrink,
+          description: `Refreshing ${drink.strDrink} - perfect to complement your meal`,
+          price: Math.floor(Math.random() * 8) + 3,
+          image: drink.strDrinkThumb,
+          category: 'Beverages',
+          rating: Math.round((Math.random() * 1.0 + 4.0) * 10) / 10,
+          prepTime: '2-5 min'
+        }));
+
+        allTransformedItems = [...allTransformedItems, ...drinkItems];
+      } catch (drinkError) {
+        console.log('Drinks API failed, continuing without beverages');
+      }
+
+      // Add some custom pizza items
+      const pizzaItems: FoodItem[] = [
+        {
+          id: 'pizza-1',
+          name: 'Margherita Pizza',
+          description: 'Classic Italian pizza with fresh tomatoes, mozzarella, and basil',
+          price: 12.99,
+          image: 'https://images.unsplash.com/photo-1604068549290-dea0e4a305ca?w=500&h=500&fit=crop',
+          category: 'Pizza',
+          rating: 4.8,
+          prepTime: '15-20 min'
+        },
+        {
+          id: 'pizza-2',
+          name: 'Pepperoni Pizza',
+          description: 'Loaded with premium pepperoni and melted cheese',
+          price: 15.99,
+          image: 'https://images.unsplash.com/photo-1628840042765-356cda07504e?w=500&h=500&fit=crop',
+          category: 'Pizza',
+          rating: 4.7,
+          prepTime: '15-20 min'
+        },
+        {
+          id: 'pizza-3',
+          name: 'Veggie Supreme Pizza',
+          description: 'Fresh vegetables, bell peppers, mushrooms, and olives',
+          price: 14.99,
+          image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=500&h=500&fit=crop',
+          category: 'Pizza',
+          rating: 4.6,
+          prepTime: '15-20 min'
+        }
+      ];
+
+      // Add custom burger items
+      const burgerItems: FoodItem[] = [
+        {
+          id: 'burger-1',
+          name: 'Classic Beef Burger',
+          description: 'Juicy beef patty with lettuce, tomato, onion, and special sauce',
+          price: 11.99,
+          image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=500&h=500&fit=crop',
+          category: 'Burgers',
+          rating: 4.5,
+          prepTime: '10-15 min'
+        },
+        {
+          id: 'burger-2',
+          name: 'Chicken Deluxe Burger',
+          description: 'Crispy chicken breast with mayo, lettuce, and pickles',
+          price: 10.99,
+          image: 'https://images.unsplash.com/photo-1606755962773-d324e2dabd05?w=500&h=500&fit=crop',
+          category: 'Burgers',
+          rating: 4.4,
+          prepTime: '10-15 min'
+        },
+        {
+          id: 'burger-3',
+          name: 'Double Cheese Burger',
+          description: 'Two beef patties with double cheese and caramelized onions',
+          price: 16.99,
+          image: 'https://images.unsplash.com/photo-1551615593-ef5fe247e8f7?w=500&h=500&fit=crop',
+          category: 'Burgers',
+          rating: 4.8,
+          prepTime: '12-18 min'
+        }
+      ];
+
+      allTransformedItems = [...allTransformedItems, ...pizzaItems, ...burgerItems];
+
       if (isLoadMore) {
-        setFoodItems(prev => [...prev, ...transformedItems]);
-        if (pageNum >= 3) setHasMore(false); // Limit to 3 pages for demo
+        // For load more, shuffle and add new items
+        const shuffled = [...allTransformedItems].sort(() => Math.random() - 0.5);
+        setFoodItems(prev => [...prev, ...shuffled.slice(0, 12)]);
+        if (pageNum >= 4) setHasMore(false);
       } else {
-        setFoodItems(transformedItems);
+        setFoodItems(allTransformedItems);
       }
     } catch (error) {
       console.error('Error fetching food items:', error);
-      // Fallback to mock data if API fails
+      // Fallback to mock data if all APIs fail
       const mockItems: FoodItem[] = [
         {
           id: '1',
@@ -92,11 +190,16 @@ export const Menu: React.FC = () => {
   const getCategoryFromMeal = (mealName: string): string => {
     const name = mealName.toLowerCase();
     if (name.includes('pizza')) return 'Pizza';
-    if (name.includes('burger') || name.includes('beef')) return 'Burgers';
-    if (name.includes('chicken') || name.includes('noodle') || name.includes('rice')) return 'Chinese';
-    if (name.includes('cake') || name.includes('dessert') || name.includes('sweet')) return 'Desserts';
-    if (name.includes('juice') || name.includes('coffee') || name.includes('drink')) return 'Beverages';
-    return 'Pizza'; // Default category
+    if (name.includes('burger') || name.includes('beef') && !name.includes('cake')) return 'Burgers';
+    if (name.includes('chicken') || name.includes('noodle') || name.includes('rice') || name.includes('stir') || name.includes('asian')) return 'Chinese';
+    if (name.includes('cake') || name.includes('dessert') || name.includes('sweet') || name.includes('ice') || name.includes('chocolate') || name.includes('cookie')) return 'Desserts';
+    if (name.includes('juice') || name.includes('coffee') || name.includes('drink') || name.includes('cocktail') || name.includes('tea')) return 'Beverages';
+    
+    // More specific categorization
+    if (name.includes('seafood') || name.includes('fish') || name.includes('salmon') || name.includes('tuna')) return 'Chinese';
+    if (name.includes('pasta') || name.includes('spaghetti') || name.includes('lasagna')) return 'Pizza';
+    
+    return 'Chinese'; // Default category for variety
   };
 
   // Infinite scroll handler
