@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { FoodCard } from '@/components/FoodCard';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Search, Filter } from 'lucide-react';
+import { Search, Loader2 } from 'lucide-react';
 import { FoodItem } from '@/types';
 
 export const Menu: React.FC = () => {
@@ -12,17 +12,54 @@ export const Menu: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
 
   const categories = ['All', 'Pizza', 'Burgers', 'Chinese', 'Desserts', 'Beverages'];
 
-  useEffect(() => {
-    // Simulate API call - in real app, would fetch from multiple food APIs
-    const fetchFoodItems = async () => {
+  // Fetch food data from TheMealDB API
+  const fetchFoodItems = useCallback(async (pageNum: number = 1, isLoadMore: boolean = false) => {
+    if (isLoadMore) {
+      setLoadingMore(true);
+    } else {
       setLoading(true);
-      
-      // Mock data simulating different API responses
+    }
+
+    try {
+      // Fetch from TheMealDB API - get random meals and category meals
+      const categories = ['Beef', 'Chicken', 'Dessert', 'Pasta', 'Seafood', 'Vegetarian'];
+      const promises = categories.map(async (category) => {
+        const response = await fetch(`https://www.themealdb.com/api/json/v1/1/filter.php?c=${category}`);
+        const data = await response.json();
+        return data.meals?.slice(0, 3) || []; // Get 3 items per category
+      });
+
+      const categoryResults = await Promise.all(promises);
+      const allMeals = categoryResults.flat();
+
+      // Transform API data to our FoodItem format
+      const transformedItems: FoodItem[] = allMeals.map((meal: any, index: number) => ({
+        id: meal.idMeal,
+        name: meal.strMeal,
+        description: `Delicious ${meal.strMeal} prepared with fresh ingredients`,
+        price: Math.floor(Math.random() * 20) + 8, // Random price between 8-28
+        image: meal.strMealThumb,
+        category: getCategoryFromMeal(meal.strMeal),
+        rating: Math.round((Math.random() * 1.5 + 3.5) * 10) / 10, // Random rating 3.5-5.0
+        prepTime: `${Math.floor(Math.random() * 20) + 15}-${Math.floor(Math.random() * 20) + 35} min`
+      }));
+
+      if (isLoadMore) {
+        setFoodItems(prev => [...prev, ...transformedItems]);
+        if (pageNum >= 3) setHasMore(false); // Limit to 3 pages for demo
+      } else {
+        setFoodItems(transformedItems);
+      }
+    } catch (error) {
+      console.error('Error fetching food items:', error);
+      // Fallback to mock data if API fails
       const mockItems: FoodItem[] = [
-        // Pizza items
         {
           id: '1',
           name: 'Margherita Pizza',
@@ -35,17 +72,6 @@ export const Menu: React.FC = () => {
         },
         {
           id: '2',
-          name: 'Pepperoni Pizza',
-          description: 'Classic pepperoni with mozzarella cheese',
-          price: 14.99,
-          image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400',
-          category: 'Pizza',
-          rating: 4.7,
-          prepTime: '25-35 min'
-        },
-        // Burger items
-        {
-          id: '3',
           name: 'Classic Burger',
           description: 'Beef patty, lettuce, tomato, cheese, and sauce',
           price: 9.99,
@@ -53,92 +79,50 @@ export const Menu: React.FC = () => {
           category: 'Burgers',
           rating: 4.6,
           prepTime: '15-25 min'
-        },
-        {
-          id: '4',
-          name: 'Chicken Burger',
-          description: 'Grilled chicken breast with fresh vegetables',
-          price: 11.99,
-          image: 'https://images.unsplash.com/photo-1572802419224-296b0aeee0d9?w=400',
-          category: 'Burgers',
-          rating: 4.5,
-          prepTime: '18-28 min'
-        },
-        // Chinese items
-        {
-          id: '5',
-          name: 'Sweet & Sour Chicken',
-          description: 'Crispy chicken with sweet and sour sauce',
-          price: 13.99,
-          image: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=400',
-          category: 'Chinese',
-          rating: 4.7,
-          prepTime: '20-30 min'
-        },
-        {
-          id: '6',
-          name: 'Fried Rice',
-          description: 'Wok-fried rice with vegetables and egg',
-          price: 8.99,
-          image: 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=400',
-          category: 'Chinese',
-          rating: 4.4,
-          prepTime: '15-20 min'
-        },
-        // Desserts
-        {
-          id: '7',
-          name: 'Chocolate Brownie',
-          description: 'Rich, fudgy brownie with chocolate chips',
-          price: 6.99,
-          image: 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=400',
-          category: 'Desserts',
-          rating: 4.9,
-          prepTime: '10-15 min'
-        },
-        {
-          id: '8',
-          name: 'Cheesecake',
-          description: 'Creamy New York style cheesecake',
-          price: 7.99,
-          image: 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=400',
-          category: 'Desserts',
-          rating: 4.8,
-          prepTime: '5-10 min'
-        },
-        // Beverages
-        {
-          id: '9',
-          name: 'Fresh Orange Juice',
-          description: 'Freshly squeezed orange juice',
-          price: 3.99,
-          image: 'https://images.unsplash.com/photo-1621506289937-a8e4df240d0b?w=400',
-          category: 'Beverages',
-          rating: 4.6,
-          prepTime: '2-5 min'
-        },
-        {
-          id: '10',
-          name: 'Iced Coffee',
-          description: 'Cold brew coffee with ice',
-          price: 4.99,
-          image: 'https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=400',
-          category: 'Beverages',
-          rating: 4.5,
-          prepTime: '3-7 min'
         }
       ];
-
-      // Simulate API delay
-      setTimeout(() => {
-        setFoodItems(mockItems);
-        setFilteredItems(mockItems);
-        setLoading(false);
-      }, 1000);
-    };
-
-    fetchFoodItems();
+      setFoodItems(isLoadMore ? prev => [...prev, ...mockItems] : mockItems);
+    } finally {
+      setLoading(false);
+      setLoadingMore(false);
+    }
   }, []);
+
+  // Helper function to categorize meals
+  const getCategoryFromMeal = (mealName: string): string => {
+    const name = mealName.toLowerCase();
+    if (name.includes('pizza')) return 'Pizza';
+    if (name.includes('burger') || name.includes('beef')) return 'Burgers';
+    if (name.includes('chicken') || name.includes('noodle') || name.includes('rice')) return 'Chinese';
+    if (name.includes('cake') || name.includes('dessert') || name.includes('sweet')) return 'Desserts';
+    if (name.includes('juice') || name.includes('coffee') || name.includes('drink')) return 'Beverages';
+    return 'Pizza'; // Default category
+  };
+
+  // Infinite scroll handler
+  const handleScroll = useCallback(() => {
+    if (window.innerHeight + document.documentElement.scrollTop !== document.documentElement.offsetHeight || loadingMore || !hasMore) {
+      return;
+    }
+    setPage(prev => prev + 1);
+  }, [loadingMore, hasMore]);
+
+  // Load more items when page changes
+  useEffect(() => {
+    if (page > 1) {
+      fetchFoodItems(page, true);
+    }
+  }, [page, fetchFoodItems]);
+
+  // Add scroll event listener
+  useEffect(() => {
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [handleScroll]);
+
+  useEffect(() => {
+    fetchFoodItems();
+  }, [fetchFoodItems]);
 
   useEffect(() => {
     let filtered = foodItems;
@@ -231,6 +215,27 @@ export const Menu: React.FC = () => {
                 <FoodCard item={item} />
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Load More Button/Loading */}
+        {!loading && hasMore && (
+          <div className="text-center mt-12">
+            {loadingMore ? (
+              <div className="flex items-center justify-center gap-2">
+                <Loader2 className="h-5 w-5 animate-spin" />
+                <span>Loading more delicious food...</span>
+              </div>
+            ) : (
+              <Button 
+                onClick={() => setPage(prev => prev + 1)}
+                variant="outline"
+                size="lg"
+                className="hover-glow"
+              >
+                Load More Food
+              </Button>
+            )}
           </div>
         )}
 

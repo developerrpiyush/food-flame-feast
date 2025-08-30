@@ -20,6 +20,7 @@ import { Addresses } from "./pages/Addresses";
 import { About } from "./pages/About";
 import { Contact } from "./pages/Contact";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+import { Footer } from "./components/Footer";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -69,6 +70,7 @@ const App = () => (
               <Route path="/contact" element={<Contact />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
+            <Footer />
           </BrowserRouter>
         </CartProvider>
       </AuthProvider>
