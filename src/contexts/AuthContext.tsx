@@ -20,9 +20,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    const savedUser = localStorage.getItem('currentUser');
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
+    try {
+      const savedUser = localStorage.getItem('currentUser');
+      if (savedUser) {
+        const parsedUser = JSON.parse(savedUser);
+        console.log('Loading saved user:', parsedUser);
+        setUser(parsedUser);
+      }
+    } catch (error) {
+      console.error('Error loading saved user:', error);
+      localStorage.removeItem('currentUser');
     }
   }, []);
 
@@ -83,6 +90,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       users.push(newUser);
       localStorage.setItem('users', JSON.stringify(users));
+      console.log('Saved new user to localStorage:', newUser);
       setUser(newUser);
       localStorage.setItem('currentUser', JSON.stringify(newUser));
       

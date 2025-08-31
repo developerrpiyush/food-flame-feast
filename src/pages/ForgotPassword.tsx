@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Mail, ArrowLeft } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
 
 export const ForgotPassword: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -29,10 +30,19 @@ export const ForgotPassword: React.FC = () => {
         setUserSecurityQuestion(user.securityQuestion);
         setStep('security');
       } else {
-        // Show error toast here if needed
+        toast({
+          title: "Email not found",
+          description: "No account found with this email address",
+          variant: "destructive",
+        });
       }
     } catch (error) {
       console.error('Error checking user:', error);
+      toast({
+        title: "Error",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
     }
     
     setIsLoading(false);
