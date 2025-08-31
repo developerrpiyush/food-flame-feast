@@ -11,13 +11,15 @@ import {
   DropdownMenuItem, 
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
-import { ShoppingCart, User, LogOut, MapPin, Clock } from 'lucide-react';
+import { ShoppingCart, User, LogOut, MapPin, Clock, Moon, Sun } from 'lucide-react';
+import { useTheme } from 'next-themes';
 
 export const Header: React.FC = () => {
   const { user, logout } = useAuth();
   const { itemCount } = useCart();
   const navigate = useNavigate();
   const [isScrolled, setIsScrolled] = useState(false);
+  const { theme, setTheme } = useTheme();
 
   React.useEffect(() => {
     const handleScroll = () => {
@@ -64,6 +66,17 @@ export const Header: React.FC = () => {
         </nav>
 
         <div className="flex items-center space-x-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+            className="h-9 w-9 hover:bg-accent"
+          >
+            <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+            <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+            <span className="sr-only">Toggle theme</span>
+          </Button>
+
           <Link to="/cart" className="relative p-2 hover:bg-accent rounded-lg transition-colors">
             <ShoppingCart className="h-5 w-5" />
             {itemCount > 0 && (
