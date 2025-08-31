@@ -45,7 +45,7 @@ export const FoodCard: React.FC<FoodCardProps> = ({ item }) => {
             <span>{item.prepTime}</span>
           </div>
           
-          <h3 className="text-xl font-semibold mb-2 group-hover:text-primary transition-colors">
+          <h3 className="text-xl font-semibold mb-2 text-foreground group-hover:text-primary transition-colors">
             {item.name}
           </h3>
           
@@ -60,7 +60,7 @@ export const FoodCard: React.FC<FoodCardProps> = ({ item }) => {
             
             <Button 
               onClick={handleAddToCart}
-              className="bg-primary hover:bg-primary-hover text-primary-foreground rounded-full w-10 h-10 p-0 hover:scale-110 transition-all duration-200"
+              className="btn-hero rounded-full w-10 h-10 p-0 hover:scale-110"
             >
               <Plus className="h-5 w-5" />
             </Button>
