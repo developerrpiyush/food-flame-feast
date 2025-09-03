@@ -101,9 +101,7 @@ export const Home: React.FC = () => {
                     Order Now
                   </Button>
                 </Link>
-                <Button size="lg" variant="outline" className="text-lg px-8 py-6 hover-glow">
-                  View Menu
-                </Button>
+              
               </div>
 
               <div className="flex items-center gap-8 pt-4">
@@ -132,7 +130,7 @@ export const Home: React.FC = () => {
                   <Badge className="bg-white/20 text-white">30% OFF</Badge>
                 </div>
                 <img 
-                  src="https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=600" 
+                  src="https://images.unsplash.com/photo-1590947132387-155cc02f3212?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
                   alt="Delicious Pizza"
                   className="w-full h-80 object-cover rounded-2xl shadow-2xl hover-glow"
                 />
