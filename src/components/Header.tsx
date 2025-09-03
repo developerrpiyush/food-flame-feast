@@ -44,7 +44,7 @@ export const Header: React.FC = () => {
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
         <Link to="/" className="flex items-center space-x-2 hover:scale-105 transition-transform">
           <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-primary-foreground font-bold text-xl">
-            F
+            🔥
           </div>
           <span className="text-2xl font-bold bg-gradient-to-r from-primary to-warning bg-clip-text text-transparent">
             FoodFlame
