@@ -109,7 +109,7 @@ export const Footer: React.FC = () => {
 
         <div className="border-t border-border mt-8 pt-8 text-center">
           <p className="text-muted-foreground">
-            © 2024 FoodFlame. All rights reserved. Made with ❤️ for food lovers.
+            © 2025 FoodFlame. All rights reserved. Made with ❤️ By Santosh for food lovers.
           </p>
         </div>
       </div>
